@@ -1,0 +1,11 @@
+*.iml
+
+.idea/
+out/
+target/
+secret.key
+release.properties
+.classpath
+.project
+.settings/
+settings.json
