@@ -25,6 +25,6 @@ public class LoggingReporter implements Reporter {
     }
 
     public void close() {
-        // nothing to do
+        //TODO
     }
 }

@@ -20,7 +20,7 @@ public class PrometheusMetricFactory {
         this.registry = registry;
     }
 
-    public Counter counter(String name) {
+    public Counter Counter(String name) {
         String key = sanitizeName(name);
         counters.computeIfAbsent( key,  k ->
                 Counter.build().name(k).help(k).register(registry)
@@ -28,7 +28,7 @@ public class PrometheusMetricFactory {
         return counters.get(key);
     }
 
-    public Gauge gauge(String name) {
+    public Gauge Gauge(String name) {
         String key = sanitizeName(name);
         gauges.computeIfAbsent( key,  k ->
                 Gauge.build().name(k).help(k).register(registry)
@@ -36,7 +36,7 @@ public class PrometheusMetricFactory {
         return gauges.get(key);
     }
 
-    public Histogram histogram(String name) {
+    public Histogram Histogram(String name) {
         String key = sanitizeName(name);
         histograms.computeIfAbsent( key, k ->
                 Histogram.build().name(k).help(k).register(registry)

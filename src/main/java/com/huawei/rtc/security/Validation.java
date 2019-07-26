@@ -1,4 +1,4 @@
-package com.huawei.rtc.utils;
+package com.huawei.rtc.security;
 
 public class Validation {
     public static Boolean IsPhoneNumber(String num) {
@@ -11,7 +11,8 @@ public class Validation {
             //validating phone number where area code is in braces ()
         else if(num.matches("\\(\\d{3}\\)-\\d{3}-\\d{4}")) return true;
             //return false if nothing matches the input
-        else return false;
+        else
+            return false;
     }
 
     //TODO
