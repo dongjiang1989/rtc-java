@@ -18,12 +18,6 @@ public class Response {
         this.statusCode = statusCode;
     }
 
-    public Response() {
-        this.stream = stream;
-        this.content = null;
-        this.statusCode = statusCode;
-    }
-
     public String getContent() {
         if (content != null) {
             return content;

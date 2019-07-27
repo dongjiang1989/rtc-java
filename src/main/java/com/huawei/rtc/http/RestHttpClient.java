@@ -121,7 +121,7 @@ public class RestHttpClient extends HttpClient {
             HttpEntity entity = response.getEntity();
             return new Response(
                     // Consume the entire HTTP response before returning the stream
-                    entity == null ? null : new BufferedHttpEntity(entity).getContent(),
+                    entity == null ? null : String.valueOf(new BufferedHttpEntity(entity).getContent()),
                     response.getStatusLine().getStatusCode()
             );
         } catch (IOException e) {

@@ -8,8 +8,6 @@ import com.huawei.rtc.rest.Domains;
 import com.huawei.rtc.exception.ApiException;
 import com.huawei.rtc.exception.RestException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 
 import java.io.Serializable;
 
@@ -23,7 +21,7 @@ public class Sms implements Serializable {
     private String signature;
     private int StateCode;
 
-    public boolean Send(final RTCManager clientManger) {
+    public ResponseImpl Send(final RTCManager clientManger) {
         Request request = new Request(
                 HttpMethod.POST,
                 Domains.SMS.toString(),
@@ -50,19 +48,9 @@ public class Sms implements Serializable {
             );
         }
 
-        return fromJson(response.getStream(), clientManger.getObjectMapper());
+        return ResponseImpl.fromJson(response.getStream(), clientManger.getObjectMapper());
     }
 
-    public static  fromJson(final InputStream json, final ObjectMapper objectMapper) {
-        // Convert all checked exceptions to Runtime
-        try {
-            return objectMapper.readValue(json, Service.class);
-        } catch (final JsonMappingException | JsonParseException e) {
-            throw new ApiException(e.getMessage(), e);
-        } catch (final IOException e) {
-            throw new ApiConnectionException(e.getMessage(), e);
-        }
-    }
 
     public boolean addPostParams(Request request) {
         request.addPostParam("from", sender);
