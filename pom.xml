@@ -16,9 +16,13 @@
     </scm>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <prometheus.version>0.0.23</prometheus.version>
         <slf4j.version>1.7.25</slf4j.version>
         <httpclient.version>4.5.6</httpclient.version>
+        <jackson.version>2.9.9</jackson.version>
+        <skip.tests>false</skip.tests>
+        <dependency.skip>false</dependency.skip>
     </properties>
 
     <dependencies>
@@ -43,6 +47,22 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -50,6 +70,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
                 <configuration>
                     <source>8</source>
                     <target>8</target>
