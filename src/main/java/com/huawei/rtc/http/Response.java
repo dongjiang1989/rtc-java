@@ -18,7 +18,7 @@ public class Response {
         this.statusCode = statusCode;
     }
 
-    public Response(final InputStream stream, final int statusCode) {
+    public Response() {
         this.stream = stream;
         this.content = null;
         this.statusCode = statusCode;

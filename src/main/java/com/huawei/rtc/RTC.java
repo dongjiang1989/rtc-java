@@ -1,6 +1,13 @@
 package com.huawei.rtc;
 
 import com.huawei.rtc.exception.AuthenticationException;
+import com.huawei.rtc.http.RTCManager;
+import com.huawei.rtc.http.HttpMethod;
+import com.huawei.rtc.http.Request;
+import com.huawei.rtc.http.Response;
+import com.huawei.rtc.http.RestHttpClient;
+import com.huawei.rtc.exception.ApiException;
+import com.huawei.rtc.exception.CertificateValidationException;
 
 public class RTC {
     public static final String VERSION = "0.0.1";
@@ -8,6 +15,9 @@ public class RTC {
 
     private static String accessKeyID;
     private static String secretAccessKey;
+
+    private static RTCManager clientManager;
+
 
     private RTC() {}
 
@@ -58,10 +68,44 @@ public class RTC {
         RTC.secretAccessKey = secret;
     }
 
+    public static RTCManager getClientManager() {
+        if (RTC.clientManager == null) {
+            if (RTC.accessKeyID == null || RTC.secretAccessKey == null) {
+                throw new AuthenticationException(
+                        "RTC ClientManager was used before accessKeyID and secretAccessKey were set, please call RTC.init()"
+                );
+            }
+
+            RTCManager.Builder builder = new RTCManager.Builder(RTC.accessKeyID, RTC.secretAccessKey);
+            RTC.clientManager = builder.build();
+        }
+
+        return RTC.clientManager;
+    }
+
+    public static void setClientManager(final RTCManager clientManager) {
+        RTC.clientManager = clientManager;
+    }
+
+    public static void validateSslCertificate() throws CertificateValidationException {
+        final RestHttpClient client = new RestHttpClient(RTC.accessKeyID, RTC.secretAccessKey);
+        final Request request = new Request(HttpMethod.GET, "https://www.baidu.com:8443");
+
+        try {
+            final Response response = client.makeRequest(request);
+
+            if (response.getStatusCode() >= 200 && response.getStatusCode() < 300) {
+                throw new CertificateValidationException("Unexpected response from certificate endpoint", request, response);
+            }
+        } catch (final ApiException e) {
+            throw new CertificateValidationException("Could not get response from certificate endpoint", request);
+        }
+    }
+
     /**
      * TearDown resource
      */
     private static void invalidate() {
-        //TODO
+        RTC.clientManager = null;
     }
 }
