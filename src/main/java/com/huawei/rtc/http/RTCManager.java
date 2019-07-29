@@ -1,6 +1,7 @@
 package com.huawei.rtc.http;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.huawei.rtc.utils.SslUtils;
 
 public class RTCManager {
 
@@ -61,6 +62,12 @@ public class RTCManager {
         }
 
         public RTCManager build() {
+            try {
+                SslUtils.ignoreSsl();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             if (this.httpClient == null) {
                 this.httpClient = new RestHttpClient(this.appKey, this.appSecret);
             }

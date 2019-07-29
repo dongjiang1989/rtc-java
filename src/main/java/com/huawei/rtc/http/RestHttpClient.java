@@ -11,11 +11,17 @@ import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.*;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -31,12 +37,12 @@ public class RestHttpClient extends HttpClient {
     private String appKey;
     private String appSecret;
 
-    private final org.apache.http.client.HttpClient client;
+    private org.apache.http.client.HttpClient client;
 
     /**
      * Create a new HTTP Client.
      */
-    public RestHttpClient(String appKey, String appSecret) {
+    public RestHttpClient(String appKey, String appSecret)  {
         this.appKey = appKey;
         this.appSecret = appSecret;
         RequestConfig config = RequestConfig.custom()
@@ -58,10 +64,21 @@ public class RestHttpClient extends HttpClient {
         connectionManager.setDefaultMaxPerRoute(10);
         connectionManager.setMaxTotal(10*2);
 
-        clientBuilder
-                .setConnectionManager(connectionManager)
-                .setDefaultRequestConfig(config)
-                .setDefaultHeaders(headers);
+
+        try {
+            HttpClientBuilder httpClientBuilder = clientBuilder
+                    .setConnectionManager(connectionManager)
+                    .setDefaultRequestConfig(config)
+                    .setSSLHostnameVerifier(new HostnameVerifier() {
+                        public boolean verify(String hostname, SSLSession session) {
+                            return true;
+                        }
+                    })
+                    .setSSLContext(new SSLContextBuilder().loadTrustMaterial(null, ((x509Certificates, s) -> true)).build())
+                    .setDefaultHeaders(headers);
+        } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
+            e.printStackTrace();
+        }
 
         client = clientBuilder.build();
     }
@@ -81,9 +98,19 @@ public class RestHttpClient extends HttpClient {
         headers.add(new BasicHeader(HttpHeaders.AUTHORIZATION, Wsse.Authorization()));
         headers.add(new BasicHeader("X-WSSE", Wsse.WsseHeader(appKey, appSecret)));
 
-        client = clientBuilder
-                .setDefaultHeaders(headers)
-                .build();
+        try {
+            client = clientBuilder
+                    .setDefaultHeaders(headers)
+                    .setSSLHostnameVerifier(new HostnameVerifier() {
+                        public boolean verify(String hostname, SSLSession session) {
+                            return true;
+                        }
+                    })
+                    .setSSLContext(new SSLContextBuilder().loadTrustMaterial(null, ((x509Certificates, s) -> true)).build())
+                    .build();
+        } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
