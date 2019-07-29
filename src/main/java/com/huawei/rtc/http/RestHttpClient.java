@@ -7,6 +7,9 @@ import org.apache.http.*;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.client.utils.HttpClientUtils;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLContexts;
+import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -16,12 +19,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.*;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -64,9 +72,13 @@ public class RestHttpClient extends HttpClient {
         connectionManager.setDefaultMaxPerRoute(10);
         connectionManager.setMaxTotal(10*2);
 
-
         try {
-            HttpClientBuilder httpClientBuilder = clientBuilder
+            SSLContext sslcontext = SSLContexts.custom().useSSL().build();
+            sslcontext.init(null, new X509TrustManager[]{new HttpsTrustManager()}, new SecureRandom());
+            SSLConnectionSocketFactory factory = new SSLConnectionSocketFactory(sslcontext,
+                    SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+
+            clientBuilder
                     .setConnectionManager(connectionManager)
                     .setDefaultRequestConfig(config)
                     .setSSLHostnameVerifier(new HostnameVerifier() {
@@ -74,13 +86,19 @@ public class RestHttpClient extends HttpClient {
                             return true;
                         }
                     })
-                    .setSSLContext(new SSLContextBuilder().loadTrustMaterial(null, ((x509Certificates, s) -> true)).build())
+                    .setSSLContext(new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy() {
+                        // 信任所有
+                        public boolean isTrusted(X509Certificate[] chain,
+                                                 String authType) throws CertificateException {
+                            return true;
+                        }
+                    }).build())
+                    .setSSLSocketFactory(factory)
                     .setDefaultHeaders(headers);
-        } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
+            client = clientBuilder.build();
+        } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
             e.printStackTrace();
         }
-
-        client = clientBuilder.build();
     }
 
     /**
