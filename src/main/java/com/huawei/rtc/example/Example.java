@@ -5,8 +5,8 @@ import com.huawei.rtc.rest.sms.v1.ResponseImpl;
 import com.huawei.rtc.rest.sms.v1.Sms;
 
 public class Example {
-    public static final String APPKEY = "7kd0790497U0gACCyVJ01t9v3b3I";
-    public static final String APPSECRET = "L080n0FjqEk4KpL9EG6Kou09R3X5";
+    public static final String APPKEY = System.getenv("RTC_APP_KEY");
+    public static final String APPSECRET = System.getenv("RTC_APP_SECRET");
 
     public static void main(String[] args)
     {
